@@ -17,7 +17,8 @@
 class Purchase < ApplicationRecord
   belongs_to :organization
   belongs_to :storage_location
-  belongs_to :vendor
+
+  belongs_to :provideable, polymorphic: true, dependent: :destroy
 
   include Itemizable
   include Filterable
@@ -26,8 +27,8 @@ class Purchase < ApplicationRecord
   scope :at_storage_location, ->(storage_location_id) {
                                 where(storage_location_id: storage_location_id)
                               }
-  scope :from_vendor, ->(vendor_id) {
-    where(vendor_id: vendor_id)
+  scope :from_vendor, ->(provideable_id) {
+    where(provideable_id: provideable_id)
   }
   scope :purchased_from, ->(purchased_from) { where(purchased_from: purchased_from) }
   scope :during, ->(range) { where(purchases: { issued_at: range }) }
@@ -48,7 +49,7 @@ class Purchase < ApplicationRecord
   end
 
   def purchased_from_view
-    vendor.nil? ? purchased_from : vendor.business_name
+    provideable.nil? ? purchased_from : provideable.business_name
   end
 
   def remove_inventory

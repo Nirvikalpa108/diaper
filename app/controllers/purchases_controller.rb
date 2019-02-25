@@ -12,12 +12,14 @@ class PurchasesController < ApplicationController
     # Using the @purchases allows drilling down instead of always starting with the total dataset
     @storage_locations = @purchases.collect(&:storage_location).compact.uniq
     @selected_storage_location = filter_params[:at_storage_location]
-    @vendors = @purchases.collect(&:vendor).compact.uniq.sort_by { |vendor| vendor.business_name.downcase }
+    @vendors = @purchases.collect(&:provideable).compact.uniq.sort_by { |vendor| vendor.business_name.downcase }
     @selected_vendor = filter_params[:from_vendor]
   end
 
   def create
     @purchase = current_organization.purchases.new(purchase_params)
+    vendor = current_organization.vendors.find(purchase_params[:provideable_id])
+    @purchase.provideable = vendor
     if @purchase.save
       @purchase.storage_location.intake! @purchase
       redirect_to purchases_path
@@ -75,7 +77,7 @@ class PurchasesController < ApplicationController
 
   def purchase_params
     params = compact_line_items
-    params.require(:purchase).permit(:comment, :amount_spent, :purchased_from, :storage_location_id, :issued_at, :vendor_id, line_items_attributes: %i(id item_id quantity _destroy)).merge(organization: current_organization)
+    params.require(:purchase).permit(:comment, :amount_spent, :purchased_from, :storage_location_id, :issued_at, :provideable_id, line_items_attributes: %i(id item_id quantity _destroy)).merge(organization: current_organization)
   end
 
   def filter_params

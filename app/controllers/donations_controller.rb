@@ -28,7 +28,7 @@ class DonationsController < ApplicationController
 
   def index
     @donations = current_organization.donations
-                                     .includes(:line_items, :storage_location, :donation_site, :diaper_drive_participant)
+                                     .includes(:line_items, :storage_location, :donation_site)
                                      .order(created_at: :desc)
                                      .class_filter(filter_params)
     # Are these going to be inefficient with large datasets?
@@ -41,7 +41,7 @@ class DonationsController < ApplicationController
     @donation_sites = @donations.collect(&:donation_site).compact.uniq
     @selected_donation_site = filter_params[:from_donation_site]
     @diaper_drives = @donations.collect do |d|
-      d.source == Donation::SOURCES[:diaper_drive] ? d.diaper_drive_participant : nil
+      d.source == Donation::SOURCES[:diaper_drive] ? d.provideable : nil
     end.compact.uniq
 
     @selected_diaper_drive = filter_params[:by_diaper_drive_participant]
@@ -68,7 +68,9 @@ class DonationsController < ApplicationController
 
   def create
     @donation = Donation.new(donation_params.merge(organization: current_organization))
-    if @donation.save
+    diaper_drive_participant = current_organization.diaper_drive_participants.find(donation_params[:provideable_id])
+    @donation.provideable = diaper_drive_participant
+    if @donation.save!
       @donation.storage_location.intake! @donation
       redirect_to donations_path
     else
@@ -126,7 +128,7 @@ class DonationsController < ApplicationController
   def donation_params
     strip_unnecessary_params
     params = compact_line_items
-    params.require(:donation).permit(:source, :comment, :storage_location_id, :money_raised, :issued_at, :donation_site_id, :diaper_drive_participant_id, line_items_attributes: %i(id item_id quantity _destroy)).merge(organization: current_organization)
+    params.require(:donation).permit(:source, :comment, :storage_location_id, :money_raised, :issued_at, :donation_site_id, :provideable_id, line_items_attributes: %i(id item_id quantity _destroy)).merge(organization: current_organization)
   end
 
   def donation_item_params

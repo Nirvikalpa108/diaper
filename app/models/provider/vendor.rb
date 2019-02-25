@@ -17,10 +17,5 @@
 #  type            :string           default("DiaperDriveParticipant")
 #
 
-class DiaperDriveParticipant < Contractor
-  has_many :donations, inverse_of: :diaper_drive_participant, dependent: :destroy
-
-  def volume
-    donations.map { |d| d.line_items.total }.reduce(:+)
-  end
+class Vendor < Provider
 end

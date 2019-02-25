@@ -18,7 +18,7 @@
 FactoryBot.define do
   factory :donation do
     donation_site
-    diaper_drive_participant
+    provideable { DiaperDriveParticipant.try(:first) || create(:diaper_drive_participant) }
     source { Donation::SOURCES[:misc] }
     comment { "It's a fine day for diapers." }
     storage_location

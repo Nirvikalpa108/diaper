@@ -94,22 +94,6 @@ ActiveRecord::Schema.define(version: 2019_02_19_080442) do
     t.string "partner_key"
   end
 
-  create_table "contractors", id: :serial, force: :cascade do |t|
-    t.string "contact_name"
-    t.string "email"
-    t.string "phone"
-    t.string "comment"
-    t.integer "organization_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "address"
-    t.string "business_name"
-    t.float "latitude"
-    t.float "longitude"
-    t.string "type", default: "DiaperDriveParticipant"
-    t.index ["latitude", "longitude"], name: "index_contractors_on_latitude_and_longitude"
-  end
-
   create_table "distributions", id: :serial, force: :cascade do |t|
     t.text "comment"
     t.datetime "created_at", null: false
@@ -147,8 +131,11 @@ ActiveRecord::Schema.define(version: 2019_02_19_080442) do
     t.integer "diaper_drive_participant_id"
     t.datetime "issued_at"
     t.integer "money_raised"
+    t.string "provideable_type"
+    t.bigint "provideable_id"
     t.index ["donation_site_id"], name: "index_donations_on_donation_site_id"
     t.index ["organization_id"], name: "index_donations_on_organization_id"
+    t.index ["provideable_type", "provideable_id"], name: "index_donations_on_provideable_type_and_provideable_id"
     t.index ["storage_location_id"], name: "index_donations_on_storage_location_id"
   end
 
@@ -238,6 +225,22 @@ ActiveRecord::Schema.define(version: 2019_02_19_080442) do
     t.index ["organization_id"], name: "index_partners_on_organization_id"
   end
 
+  create_table "providers", id: :serial, force: :cascade do |t|
+    t.string "contact_name"
+    t.string "email"
+    t.string "phone"
+    t.string "comment"
+    t.integer "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "address"
+    t.string "business_name"
+    t.float "latitude"
+    t.float "longitude"
+    t.string "type", default: "DiaperDriveParticipant"
+    t.index ["latitude", "longitude"], name: "index_providers_on_latitude_and_longitude"
+  end
+
   create_table "purchases", force: :cascade do |t|
     t.string "purchased_from"
     t.text "comment"
@@ -247,8 +250,10 @@ ActiveRecord::Schema.define(version: 2019_02_19_080442) do
     t.datetime "issued_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "vendor_id"
+    t.string "provideable_type"
+    t.bigint "provideable_id"
     t.index ["organization_id"], name: "index_purchases_on_organization_id"
+    t.index ["provideable_type", "provideable_id"], name: "index_purchases_on_provideable_type_and_provideable_id"
     t.index ["storage_location_id"], name: "index_purchases_on_storage_location_id"
   end
 

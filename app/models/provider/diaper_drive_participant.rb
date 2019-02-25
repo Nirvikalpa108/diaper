@@ -17,10 +17,7 @@
 #  type            :string           default("DiaperDriveParticipant")
 #
 
-class Vendor < Contractor
-  has_many :purchases, inverse_of: :vendor, dependent: :destroy
-
-  def volume
-    purchases.map { |d| d.line_items.total }.reduce(:+)
-  end
+class DiaperDriveParticipant < Provider
+  validates :phone, presence: { message: "Must provide a phone or an e-mail" }, if: proc { |ddp| ddp.email.blank? }
+  validates :email, presence: { message: "Must provide a phone or an e-mail" }, if: proc { |ddp| ddp.phone.blank? }
 end

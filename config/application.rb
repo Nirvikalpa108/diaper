@@ -24,7 +24,7 @@ module Diaper
       Devise::PasswordsController.layout "devise"
       Devise::RegistrationsController.layout "application"
     end
-    config.autoload_paths += %W(#{Rails.root}/app/models/contractor)
+    config.autoload_paths += %W(#{Rails.root}/app/models/provider)
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.

@@ -17,15 +17,15 @@
 #  type            :string           default("DiaperDriveParticipant")
 #
 
-class Contractor < ApplicationRecord
+class Provider < ApplicationRecord
   require "csv"
 
   belongs_to :organization # Automatically validates presence as of Rails 5
 
+  has_many :provided_items, as: :provideable, dependent: :destroy
+
   validates :contact_name, presence: { message: "Must provide a name or a business name" }, if: proc { |ddp| ddp.business_name.blank? }
   validates :business_name, presence: { message: "Must provide a name or a business name" }, if: proc { |ddp| ddp.contact_name.blank? }
-  validates :phone, presence: { message: "Must provide a phone or an e-mail" }, if: proc { |ddp| ddp.email.blank? }
-  validates :email, presence: { message: "Must provide a phone or an e-mail" }, if: proc { |ddp| ddp.phone.blank? }
 
   geocoded_by :address
   after_validation :geocode, if: ->(obj) { obj.address.present? && obj.address_changed? }
@@ -52,5 +52,9 @@ class Contractor < ApplicationRecord
      try(:phone) || "",
      try(:email) || "",
      volume]
+  end
+
+  def volume
+    provided_items.map { |d| d.line_items.total }.reduce(:+)
   end
 end

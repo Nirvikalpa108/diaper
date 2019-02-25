@@ -1,6 +1,6 @@
 # == Schema Information
 #
-# Table name: contractors
+# Table name: providers
 #
 #  id              :integer          not null, primary key
 #  contact_name    :string

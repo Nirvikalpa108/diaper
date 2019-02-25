@@ -23,8 +23,8 @@ class Donation < ApplicationRecord
   belongs_to :organization
 
   belongs_to :donation_site, optional: true # Validation is conditionally handled below.
-  belongs_to :diaper_drive_participant, optional: proc { |d| d.from_diaper_drive? } # Validation is conditionally handled below.
   belongs_to :storage_location
+  belongs_to :provideable, polymorphic: true, optional: proc { |d| d.from_diaper_drive? }, dependent: :destroy
   include Itemizable
 
   include Filterable
@@ -33,8 +33,8 @@ class Donation < ApplicationRecord
   }
   scope :by_source, ->(source) { where(source: source) }
   scope :from_donation_site, ->(donation_site_id) { where(donation_site_id: donation_site_id) }
-  scope :by_diaper_drive_participant, ->(diaper_drive_participant_id) {
-    where(diaper_drive_participant_id: diaper_drive_participant_id)
+  scope :by_diaper_drive_participant, ->(provideable_id) {
+    where(provideable_id: provideable_id)
   }
   scope :for_csv_export, ->(organization) {
     where(organization: organization)
@@ -48,7 +48,7 @@ class Donation < ApplicationRecord
   validates :donation_site, presence:
     { message: "must be specified since you chose '#{SOURCES[:donation_site]}'" },
                             if: :from_donation_site?
-  validates :diaper_drive_participant, presence:
+  validates :provideable, presence:
     { message: "must be specified since you chose '#{SOURCES[:diaper_drive]}'" },
                                        if: :from_diaper_drive?
   validates :source, presence: true, inclusion: { in: SOURCES.values,
@@ -76,8 +76,8 @@ class Donation < ApplicationRecord
   end
 
   def format_drive_name
-    if diaper_drive_participant.contact_name.present?
-      "#{diaper_drive_participant.contact_name} (diaper drive)"
+    if provideable.contact_name.present?
+      "#{provideable.contact_name} (diaper drive)"
     else
       source
     end
